@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#075985">
+<title>NeedBridge - Ask • Help • Grow</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f0f9ff;color:#123047}
+header{background:#075985;color:white;padding:22px 16px;text-align:center}
+.logo{font-size:32px}
+header h1{margin:8px 0}
+header p{letter-spacing:2px;font-size:12px}
+nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:14px;background:white}
+button{border:0;border-radius:9px;padding:12px 17px;background:#0891b2;color:white;font-weight:bold;cursor:pointer}
+button:hover{background:#075985}
+main{max-width:850px;margin:25px auto;padding:16px}
+.hero{text-align:center;padding:35px 15px;background:white;border-radius:18px;box-shadow:0 4px 18px #00000010}
+.hero h2{font-size:29px;color:#075985}
+.hero p{line-height:1.7;color:#526575}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:13px;margin-top:22px}
+.card{background:white;padding:20px 12px;border-radius:14px;text-align:center;box-shadow:0 3px 12px #0000000c}
+.card span{font-size:30px}
+.card h3{font-size:16px;color:#075985}
+section{background:white;margin-top:20px;padding:20px;border-radius:15px}
+input,textarea,select{width:100%;padding:13px;margin:8px 0 14px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
+textarea{min-height:100px}
+.hidden{display:none}
+footer{text-align:center;padding:25px;color:#64748b}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">🌉</div>
+<h1>NeedBridge</h1>
+<p>ASK • HELP • GROW TOGETHER</p>
+</header>
+
+<nav>
+<button onclick="show('home')">Home</button>
+<button onclick="show('help')">Ask for Help</button>
+<button onclick="show('opportunities')">Opportunities</button>
+<button onclick="show('account')">Login / Sign Up</button>
+</nav>
+
+<main>
+<div id="home">
+<div class="hero">
+<h2>Welcome to NeedBridge ❤️</h2>
+<p>A place where people help each other, share opportunities and build a better future together.</p>
+<button onclick="show('help')">Ask for Help</button>
+<button onclick="show('opportunities')">Explore Opportunities</button>
+</div>
+
+<div class="cards">
+<div class="card"><span>🍲</span><h3>Food Help</h3></div>
+<div class="card"><span>📚</span><h3>Education</h3></div>
+<div class="card"><span>🏥</span><h3>Healthcare</h3></div>
+<div class="card"><span>🛂</span><h3>Visa Help</h3></div>
+<div class="card"><span>👕</span><h3>Clothing</h3></div>
+<div class="card"><span>🤝</span><h3>Volunteering</h3></div>
+</div>
+</div>
+
+<section id="help" class="hidden">
+<h2>Ask for Help</h2>
+<p>Share what kind of help you need.</p>
+<input placeholder="Your name">
+<select>
+<option>Select category</option>
+<option>Food</option><option>Education</option>
+<option>Healthcare</option><option>Visa</option>
+<option>Clothing</option><option>Volunteering</option>
+</select>
+<input placeholder="Country">
+<input placeholder="City">
+<textarea placeholder="Describe the help you need"></textarea>
+<button onclick="alert('This form will be connected to the database in the next step.')">Submit Request</button>
+</section>
+
+<section id="opportunities" class="hidden">
+<h2>Opportunities</h2>
+<p>Find useful opportunities for a better future.</p>
+<div class="cards">
+<div class="card">🎓<h3>Scholarships</h3></div>
+<div class="card">💼<h3>Jobs</h3></div>
+<div class="card">🛂<h3>Visa Information</h3></div>
+<div class="card">🌐<h3>Free Courses</h3></div>
+</div>
+</section>
+
+<section id="account" class="hidden">
+<h2>Welcome Back</h2>
+<p>Account registration and secure login will be connected in the next step.</p>
+<input type="email" placeholder="Email address">
+<input type="password" placeholder="Password">
+<button onclick="alert('Secure account system will be added in the next step.')">Login</button>
+</section>
+</main>
+
+<footer>NeedBridge © 2026 — Ask • Help • Grow Together ❤️</footer>
+
+<script>
+function show(id){
+document.querySelectorAll('main > div, main > section').forEach(x=>x.classList.add('hidden'));
+document.getElementById(id).classList.remove('hidden');
+window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
