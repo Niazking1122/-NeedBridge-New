@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NeedBridge - Ask • Help • Grow Together</title>
 <meta name="theme-color" content="#075985">
 <script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script>
@@ -10,10 +11,10 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f0f9ff;color:#123047}
-header{background:#075985;color:white;padding:22px 15px;text-align:center}
+header{background:#075985;color:white;padding:22px 12px;text-align:center}
 header h1{margin:0;font-size:29px}
-header p{margin:7px 0 0}
-main{max-width:700px;margin:25px auto;padding:15px}
+header p{margin:7px 0}
+main{max-width:700px;margin:24px auto;padding:12px}
 .card{background:white;padding:20px;border-radius:16px;margin-bottom:18px;box-shadow:0 3px 15px #0001}
 h2{color:#075985}
 input,textarea,select{width:100%;padding:13px;margin:8px 0;border:1px solid #cbd5e1;border-radius:9px;font-size:16px}
@@ -22,15 +23,14 @@ button{background:#075985;color:white;border:0;border-radius:9px;padding:13px 18
 button.secondary{background:#0f766e}
 button:disabled{opacity:.6}
 .hidden{display:none!important}
-.item{border-bottom:1px solid #ddd;padding:12px 0}
+.item{border-bottom:1px solid #ddd;padding:12px 0;overflow-wrap:anywhere}
 small{color:#64748b}
-#notice{padding:10px;color:#075985;overflow-wrap:anywhere}
+.notice{padding:10px;color:#075985;overflow-wrap:anywhere}
 footer{text-align:center;color:#64748b;padding:20px}
 </style>
 </head>
 
 <body>
-
 <header>
 <h1>🌉 NeedBridge</h1>
 <p>ASK • HELP • GROW TOGETHER</p>
@@ -50,12 +50,10 @@ footer{text-align:center;color:#64748b;padding:20px}
 <input id="name" placeholder="Full name">
 <input id="email" type="email" placeholder="Email address">
 <input id="password" type="password" placeholder="Password (minimum 8 characters)">
-
 <button id="signupBtn" onclick="signup()">Sign Up</button>
 <button id="loginBtn" class="secondary" onclick="login()">Login</button>
 <button onclick="resetPassword()">Forgot Password?</button>
-
-<p id="notice"></p>
+<p id="notice" class="notice"></p>
 </section>
 
 <section id="home" class="hidden">
@@ -68,10 +66,8 @@ footer{text-align:center;color:#64748b;padding:20px}
 
 <div class="card">
 <h2>Ask for Help</h2>
-
 <input id="helpTitle" placeholder="What help do you need?">
 <textarea id="helpDescription" placeholder="Explain your request"></textarea>
-
 <select id="helpCategory">
 <option>Food</option>
 <option>Education</option>
@@ -80,20 +76,16 @@ footer{text-align:center;color:#64748b;padding:20px}
 <option>Clothing</option>
 <option>Volunteering</option>
 </select>
-
 <input id="helpCountry" placeholder="Country">
 <input id="helpCity" placeholder="City">
-
 <button onclick="submitHelp()">Submit Request</button>
-<p id="helpNotice"></p>
+<p id="helpNotice" class="notice"></p>
 </div>
 
 <div class="card">
 <h2>Give Help / Opportunities</h2>
-
 <input id="oppTitle" placeholder="Opportunity title">
 <textarea id="oppDescription" placeholder="Details"></textarea>
-
 <select id="oppCategory">
 <option>Food</option>
 <option>Education</option>
@@ -102,7 +94,6 @@ footer{text-align:center;color:#64748b;padding:20px}
 <option>Clothing</option>
 <option>Volunteering</option>
 </select>
-
 <select id="oppType">
 <option>Free Help</option>
 <option>Scholarship</option>
@@ -110,13 +101,11 @@ footer{text-align:center;color:#64748b;padding:20px}
 <option>Visa</option>
 <option>Free Course</option>
 </select>
-
 <input id="oppCountry" placeholder="Country">
 <input id="oppCity" placeholder="City">
 <input id="oppLink" placeholder="Official website link (optional)">
-
 <button onclick="submitOpportunity()">Submit Opportunity</button>
-<p id="oppNotice"></p>
+<p id="oppNotice" class="notice"></p>
 </div>
 
 <div class="card">
@@ -132,12 +121,10 @@ footer{text-align:center;color:#64748b;padding:20px}
 </section>
 </main>
 
-<footer>
-🌉 NeedBridge — ASK • HELP • GROW TOGETHER ❤️
-</footer>
+<footer>🌉 NeedBridge — ASK • HELP • GROW TOGETHER ❤️</footer>
 
 <script>
-/* APPWRITE CONNECTION */
+/* APPWRITE SETTINGS */
 
 const PROJECT_ID = "6b06ace4002b102e3d8a";
 const ENDPOINT = "https://sgp.cloud.appwrite.io/v1";
@@ -156,35 +143,37 @@ const tables = new Appwrite.TablesDB(client);
 let currentUser = null;
 
 
-/* BASIC FUNCTIONS */
+/* GENERAL FUNCTIONS */
 
 function showAuth(){
   document.getElementById("welcome").classList.add("hidden");
   document.getElementById("auth").classList.remove("hidden");
 }
 
-function message(text){
-  document.getElementById("notice").textContent = text;
-}
-
-function setButtonLoading(id, loading, normalText){
-  const btn = document.getElementById(id);
-  btn.disabled = loading;
-  btn.textContent = loading ? "Please wait..." : normalText;
+function setMessage(id,text){
+  document.getElementById(id).textContent = text;
 }
 
 function escapeHTML(value){
-  return String(value || "").replace(/[&<>"']/g, char => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
-  })[char]);
+  return String(value || "").replace(/[&<>"']/g, function(char){
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[char];
+  });
+}
+
+function setLoading(id,loading,text){
+  const button = document.getElementById(id);
+  button.disabled = loading;
+  button.textContent = loading ? "Please wait..." : text;
 }
 
 
-/* OPEN HOME */
+/* SHOW HOME */
 
 async function startApp(){
   try{
@@ -197,18 +186,15 @@ async function startApp(){
     document.getElementById("userEmail").textContent =
       "Logged in as: " + currentUser.email;
 
-    document.getElementById("myRequests").textContent = "Loading...";
-    document.getElementById("opportunities").textContent = "Loading...";
+    await loadMyRequests();
+    await loadOpportunities();
 
-    loadMyRequests();
-    loadOpportunities();
+    return true;
 
   }catch(error){
     currentUser = null;
     document.getElementById("home").classList.add("hidden");
-    document.getElementById("auth").classList.add("hidden");
-    document.getElementById("welcome").classList.remove("hidden");
-    console.log("No active session:", error.message);
+    return false;
   }
 }
 
@@ -221,38 +207,33 @@ async function signup(){
   const password = document.getElementById("password").value;
 
   if(!name || !email || password.length < 8){
-    message("Enter your name, email and password (at least 8 characters).");
+    setMessage("notice","Enter your name, email and password (at least 8 characters).");
     return;
   }
 
-  setButtonLoading("signupBtn", true, "Sign Up");
+  setLoading("signupBtn",true,"Sign Up");
 
   try{
-    await account.create({
-      userId: Appwrite.ID.unique(),
-      email: email,
-      password: password,
-      name: name
-    });
+    await account.create(
+      Appwrite.ID.unique(),
+      email,
+      password,
+      name
+    );
 
     try{
-      await account.createEmailPasswordSession({
-        email: email,
-        password: password
-      });
+      await account.createEmailPasswordSession(email,password);
     }catch(sessionError){
-      const existing = await account.get();
-      if(!existing){
-        throw sessionError;
-      }
+      setMessage("notice","Account created. Please use Login with your email and password.");
+      return;
     }
 
     await startApp();
 
   }catch(error){
-    message(error.message);
+    setMessage("notice",error.message);
   }finally{
-    setButtonLoading("signupBtn", false, "Sign Up");
+    setLoading("signupBtn",false,"Sign Up");
   }
 }
 
@@ -264,32 +245,33 @@ async function login(){
   const password = document.getElementById("password").value;
 
   if(!email || !password){
-    message("Enter your email and password.");
+    setMessage("notice","Enter your email and password.");
     return;
   }
 
-  setButtonLoading("loginBtn", true, "Login");
+  setLoading("loginBtn",true,"Login");
 
   try{
-    try{
-      await account.get();
-      await startApp();
+    // If a session already exists, open the home page.
+    const alreadyLoggedIn = await startApp();
+
+    if(alreadyLoggedIn){
       return;
-    }catch(noSession){
-      // No active session. Continue to login.
     }
 
-    await account.createEmailPasswordSession({
-      email: email,
-      password: password
-    });
+    // Create a new session.
+    await account.createEmailPasswordSession(email,password);
 
-    await startApp();
+    const opened = await startApp();
+
+    if(!opened){
+      setMessage("notice","Login succeeded, but the home page could not load.");
+    }
 
   }catch(error){
-    message(error.message);
+    setMessage("notice",error.message);
   }finally{
-    setButtonLoading("loginBtn", false, "Login");
+    setLoading("loginBtn",false,"Login");
   }
 }
 
@@ -298,7 +280,7 @@ async function login(){
 
 async function logout(){
   try{
-    await account.deleteSession({sessionId:"current"});
+    await account.deleteSession("current");
     currentUser = null;
     location.reload();
   }catch(error){
@@ -313,19 +295,20 @@ async function resetPassword(){
   const email = document.getElementById("email").value.trim();
 
   if(!email){
-    message("Enter your email first.");
+    setMessage("notice","Enter your email first.");
     return;
   }
 
   try{
-    await account.createRecovery({
-      email: email,
-      url: location.origin + location.pathname
-    });
+    await account.createRecovery(
+      email,
+      location.origin + location.pathname
+    );
 
-    message("Password recovery email sent. Check your inbox.");
+    setMessage("notice","Password recovery email sent. Check your inbox.");
+
   }catch(error){
-    message(error.message);
+    setMessage("notice",error.message);
   }
 }
 
@@ -333,22 +316,20 @@ async function resetPassword(){
 /* SUBMIT HELP REQUEST */
 
 async function submitHelp(){
-  const notice = document.getElementById("helpNotice");
+  const title = document.getElementById("helpTitle").value.trim();
+  const description = document.getElementById("helpDescription").value.trim();
+
+  if(!currentUser){
+    setMessage("helpNotice","Please login first.");
+    return;
+  }
+
+  if(!title || !description){
+    setMessage("helpNotice","Enter title and description.");
+    return;
+  }
 
   try{
-    if(!currentUser){
-      notice.textContent = "Please login first.";
-      return;
-    }
-
-    const title = document.getElementById("helpTitle").value.trim();
-    const description = document.getElementById("helpDescription").value.trim();
-
-    if(!title || !description){
-      notice.textContent = "Enter title and description.";
-      return;
-    }
-
     await tables.createRow({
       databaseId: DATABASE_ID,
       tableId: HELP_TABLE_ID,
@@ -365,7 +346,7 @@ async function submitHelp(){
       }
     });
 
-    notice.textContent = "Submitted successfully. Waiting for Admin approval.";
+    setMessage("helpNotice","Request submitted. Waiting for Admin approval.");
 
     document.getElementById("helpTitle").value = "";
     document.getElementById("helpDescription").value = "";
@@ -373,7 +354,7 @@ async function submitHelp(){
     await loadMyRequests();
 
   }catch(error){
-    notice.textContent = error.message;
+    setMessage("helpNotice",error.message);
   }
 }
 
@@ -381,22 +362,20 @@ async function submitHelp(){
 /* SUBMIT OPPORTUNITY */
 
 async function submitOpportunity(){
-  const notice = document.getElementById("oppNotice");
+  const title = document.getElementById("oppTitle").value.trim();
+  const description = document.getElementById("oppDescription").value.trim();
+
+  if(!currentUser){
+    setMessage("oppNotice","Please login first.");
+    return;
+  }
+
+  if(!title || !description){
+    setMessage("oppNotice","Enter opportunity title and details.");
+    return;
+  }
 
   try{
-    if(!currentUser){
-      notice.textContent = "Please login first.";
-      return;
-    }
-
-    const title = document.getElementById("oppTitle").value.trim();
-    const description = document.getElementById("oppDescription").value.trim();
-
-    if(!title || !description){
-      notice.textContent = "Enter opportunity title and details.";
-      return;
-    }
-
     await tables.createRow({
       databaseId: DATABASE_ID,
       tableId: OPPORTUNITY_TABLE_ID,
@@ -414,14 +393,14 @@ async function submitOpportunity(){
       }
     });
 
-    notice.textContent = "Opportunity submitted. Waiting for Admin approval.";
+    setMessage("oppNotice","Opportunity submitted. Waiting for Admin approval.");
 
     document.getElementById("oppTitle").value = "";
     document.getElementById("oppDescription").value = "";
     document.getElementById("oppLink").value = "";
 
   }catch(error){
-    notice.textContent = error.message;
+    setMessage("oppNotice",error.message);
   }
 }
 
@@ -432,26 +411,23 @@ async function loadMyRequests(){
   const box = document.getElementById("myRequests");
 
   try{
-    if(!currentUser){
-      box.textContent = "Please login.";
-      return;
-    }
-
     const result = await tables.listRows({
       databaseId: DATABASE_ID,
       tableId: HELP_TABLE_ID,
       queries: [
-        Appwrite.Query.equal("user_id", currentUser.$id)
+        Appwrite.Query.equal("user_id",currentUser.$id)
       ]
     });
 
-    box.innerHTML = result.rows.map(row => `
-      <div class="item">
-        <b>${escapeHTML(row.title)}</b>
-        <br>
-        <small>Status: ${escapeHTML(row.status)}</small>
-      </div>
-    `).join("") || "No requests yet.";
+    box.innerHTML = result.rows.map(function(row){
+      return `
+        <div class="item">
+          <b>${escapeHTML(row.title)}</b>
+          <br>
+          <small>Status: ${escapeHTML(row.status)}</small>
+        </div>
+      `;
+    }).join("") || "No requests yet.";
 
   }catch(error){
     box.textContent = "Could not load requests: " + error.message;
@@ -469,26 +445,28 @@ async function loadOpportunities(){
       databaseId: DATABASE_ID,
       tableId: OPPORTUNITY_TABLE_ID,
       queries: [
-        Appwrite.Query.equal("status", "approved")
+        Appwrite.Query.equal("status","approved")
       ]
     });
 
-    box.innerHTML = result.rows.map(row => `
-      <div class="item">
-        <b>${escapeHTML(row.title)}</b>
-        <p>${escapeHTML(row.description)}</p>
-        <small>
-          ${escapeHTML(row.type)} |
-          ${escapeHTML(row.country)} |
-          ${escapeHTML(row.city)}
-        </small>
-        ${
-          row.link
-          ? `<p><a href="${escapeHTML(row.link)}" target="_blank" rel="noopener noreferrer">Open opportunity link</a></p>`
-          : ""
-        }
-      </div>
-    `).join("") || "No approved opportunities yet.";
+    box.innerHTML = result.rows.map(function(row){
+      const link = row.link
+        ? `<p><a href="${escapeHTML(row.link)}" target="_blank" rel="noopener noreferrer">Open opportunity link</a></p>`
+        : "";
+
+      return `
+        <div class="item">
+          <b>${escapeHTML(row.title)}</b>
+          <p>${escapeHTML(row.description)}</p>
+          <small>
+            ${escapeHTML(row.type)} |
+            ${escapeHTML(row.country)} |
+            ${escapeHTML(row.city)}
+          </small>
+          ${link}
+        </div>
+      `;
+    }).join("") || "No approved opportunities yet.";
 
   }catch(error){
     box.textContent = "Could not load opportunities: " + error.message;
@@ -496,9 +474,17 @@ async function loadOpportunities(){
 }
 
 
-/* CHECK LOGIN WHEN WEBSITE OPENS */
+/* CHECK EXISTING SESSION ON PAGE LOAD */
 
-startApp();
+(async function(){
+  const loggedIn = await startApp();
+
+  if(!loggedIn){
+    document.getElementById("welcome").classList.remove("hidden");
+    document.getElementById("auth").classList.add("hidden");
+    document.getElementById("home").classList.add("hidden");
+  }
+})();
 
 </script>
 </body>
