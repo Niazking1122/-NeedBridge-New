@@ -3,111 +3,319 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeedBridge - Ask • Help • Grow Together</title>
 <meta name="theme-color" content="#075985">
-<title>NeedBridge - Ask • Help • Grow</title>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f0f9ff;color:#123047}
-header{background:#075985;color:white;padding:22px 16px;text-align:center}
-.logo{font-size:32px}
-header h1{margin:8px 0}
-header p{letter-spacing:2px;font-size:12px}
-nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:14px;background:white}
-button{border:0;border-radius:9px;padding:12px 17px;background:#0891b2;color:white;font-weight:bold;cursor:pointer}
-button:hover{background:#075985}
-main{max-width:850px;margin:25px auto;padding:16px}
-.hero{text-align:center;padding:35px 15px;background:white;border-radius:18px;box-shadow:0 4px 18px #00000010}
-.hero h2{font-size:29px;color:#075985}
-.hero p{line-height:1.7;color:#526575}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:13px;margin-top:22px}
-.card{background:white;padding:20px 12px;border-radius:14px;text-align:center;box-shadow:0 3px 12px #0000000c}
-.card span{font-size:30px}
-.card h3{font-size:16px;color:#075985}
-section{background:white;margin-top:20px;padding:20px;border-radius:15px}
-input,textarea,select{width:100%;padding:13px;margin:8px 0 14px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
-textarea{min-height:100px}
+header{background:#075985;color:white;padding:20px;text-align:center}
+header h1{margin:0;font-size:28px}
+header p{margin:7px 0 0}
+main{max-width:650px;margin:25px auto;padding:15px}
+.card{background:white;padding:20px;border-radius:16px;margin-bottom:18px;box-shadow:0 3px 15px #0001}
+h2{color:#075985}
+input,textarea,select{width:100%;padding:13px;margin:8px 0;border:1px solid #cbd5e1;border-radius:9px;font-size:16px}
+button{background:#075985;color:white;border:0;border-radius:9px;padding:13px 18px;font-size:16px;margin:5px;cursor:pointer}
+button.secondary{background:#0f766e}
 .hidden{display:none}
-footer{text-align:center;padding:25px;color:#64748b}
+nav{display:flex;flex-wrap:wrap;justify-content:center}
+.item{border-bottom:1px solid #ddd;padding:12px 0}
+small{color:#64748b}
+#notice{padding:10px;color:#075985}
 </style>
 </head>
 <body>
 
 <header>
-<div class="logo">🌉</div>
-<h1>NeedBridge</h1>
+<h1>🌉 NeedBridge</h1>
 <p>ASK • HELP • GROW TOGETHER</p>
+<p>A Place Where Helping Matters ❤️</p>
 </header>
 
-<nav>
-<button onclick="show('home')">Home</button>
-<button onclick="show('help')">Ask for Help</button>
-<button onclick="show('opportunities')">Opportunities</button>
-<button onclick="show('account')">Login / Sign Up</button>
-</nav>
-
 <main>
-<div id="home">
-<div class="hero">
-<h2>Welcome to NeedBridge ❤️</h2>
-<p>A place where people help each other, share opportunities and build a better future together.</p>
-<button onclick="show('help')">Ask for Help</button>
-<button onclick="show('opportunities')">Explore Opportunities</button>
+<section id="welcome" class="card">
+<h2>Welcome to NeedBridge!</h2>
+<p>Connect with people. Ask for help. Share opportunities. Help each other.</p>
+<button onclick="showAuth()">Let's Get Started!</button>
+</section>
+
+<section id="auth" class="card hidden">
+<h2>Account</h2>
+<input id="name" placeholder="Full name">
+<input id="email" type="email" placeholder="Email address">
+<input id="password" type="password" placeholder="Password">
+<button onclick="signup()">Sign Up</button>
+<button class="secondary" onclick="login()">Login</button>
+<button onclick="resetPassword()">Forgot Password?</button>
+<p id="notice"></p>
+</section>
+
+<section id="home" class="hidden">
+<div class="card">
+<h2>Welcome!</h2>
+<p id="userEmail"></p>
+<button onclick="logout()">Logout</button>
 </div>
 
-<div class="cards">
-<div class="card"><span>🍲</span><h3>Food Help</h3></div>
-<div class="card"><span>📚</span><h3>Education</h3></div>
-<div class="card"><span>🏥</span><h3>Healthcare</h3></div>
-<div class="card"><span>🛂</span><h3>Visa Help</h3></div>
-<div class="card"><span>👕</span><h3>Clothing</h3></div>
-<div class="card"><span>🤝</span><h3>Volunteering</h3></div>
-</div>
-</div>
-
-<section id="help" class="hidden">
+<div class="card">
 <h2>Ask for Help</h2>
-<p>Share what kind of help you need.</p>
-<input placeholder="Your name">
-<select>
-<option>Select category</option>
+<input id="helpTitle" placeholder="What help do you need?">
+<textarea id="helpDescription" placeholder="Explain your request"></textarea>
+<select id="helpCategory">
 <option>Food</option><option>Education</option>
 <option>Healthcare</option><option>Visa</option>
 <option>Clothing</option><option>Volunteering</option>
 </select>
-<input placeholder="Country">
-<input placeholder="City">
-<textarea placeholder="Describe the help you need"></textarea>
-<button onclick="alert('This form will be connected to the database in the next step.')">Submit Request</button>
-</section>
-
-<section id="opportunities" class="hidden">
-<h2>Opportunities</h2>
-<p>Find useful opportunities for a better future.</p>
-<div class="cards">
-<div class="card">🎓<h3>Scholarships</h3></div>
-<div class="card">💼<h3>Jobs</h3></div>
-<div class="card">🛂<h3>Visa Information</h3></div>
-<div class="card">🌐<h3>Free Courses</h3></div>
+<input id="helpCountry" placeholder="Country">
+<input id="helpCity" placeholder="City">
+<button onclick="submitHelp()">Submit Request</button>
 </div>
-</section>
 
-<section id="account" class="hidden">
-<h2>Welcome Back</h2>
-<p>Account registration and secure login will be connected in the next step.</p>
-<input type="email" placeholder="Email address">
-<input type="password" placeholder="Password">
-<button onclick="alert('Secure account system will be added in the next step.')">Login</button>
+<div class="card">
+<h2>Give Help / Opportunities</h2>
+<input id="oppTitle" placeholder="Opportunity title">
+<textarea id="oppDescription" placeholder="Details"></textarea>
+<select id="oppCategory">
+<option>Food</option><option>Education</option>
+<option>Healthcare</option><option>Visa</option>
+<option>Clothing</option><option>Volunteering</option>
+</select>
+<select id="oppType">
+<option>Free Help</option><option>Scholarship</option>
+<option>Job</option><option>Visa</option>
+<option>Free Course</option>
+</select>
+<input id="oppCountry" placeholder="Country">
+<input id="oppCity" placeholder="City">
+<input id="oppLink" placeholder="Official website link (optional)">
+<button onclick="submitOpportunity()">Submit Opportunity</button>
+</div>
+
+<div class="card">
+<h2>My Help Requests</h2>
+<div id="myRequests">Loading...</div>
+</div>
+
+<div class="card">
+<h2>Opportunities</h2>
+<div id="opportunities">Loading...</div>
+</div>
 </section>
 </main>
 
-<footer>NeedBridge © 2026 — Ask • Help • Grow Together ❤️</footer>
-
 <script>
-function show(id){
-document.querySelectorAll('main > div, main > section').forEach(x=>x.classList.add('hidden'));
-document.getElementById(id).classList.remove('hidden');
-window.scrollTo(0,0);
+const PROJECT_ID = "6b06ace4002b102e3d8a";
+const ENDPOINT = "https://sgp.cloud.appwrite.io/v1";
+const DATABASE_ID = "6b06af340008fdcc2251";
+
+const client = new Appwrite.Client()
+  .setEndpoint(ENDPOINT)
+  .setProject(PROJECT_ID);
+
+const account = new Appwrite.Account(client);
+const tables = new Appwrite.TablesDB(client);
+
+let currentUser = null;
+
+function showAuth() {
+  document.getElementById("welcome").classList.add("hidden");
+  document.getElementById("auth").classList.remove("hidden");
 }
+
+function message(text) {
+  document.getElementById("notice").textContent = text;
+}
+
+async function signup() {
+  try {
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    if (!name || !email || password.length < 8) {
+      message("Enter your name, email and password (at least 8 characters).");
+      return;
+    }
+
+    await account.create(
+      Appwrite.ID.unique(),
+      email,
+      password,
+      name
+    );
+
+    await account.createEmailPasswordSession(email, password);
+    await startApp();
+  } catch (error) {
+    message(error.message);
+  }
+}
+
+async function login() {
+  try {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    await account.createEmailPasswordSession(email, password);
+    await startApp();
+  } catch (error) {
+    message(error.message);
+  }
+}
+
+async function logout() {
+  try {
+    await account.deleteSession("current");
+    location.reload();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function resetPassword() {
+  try {
+    const email = document.getElementById("email").value.trim();
+
+    if (!email) {
+      message("Enter your email first.");
+      return;
+    }
+
+    await account.createRecovery(
+      email,
+      location.origin + location.pathname
+    );
+
+    message("Password recovery email sent.");
+  } catch (error) {
+    message(error.message);
+  }
+}
+
+async function startApp() {
+  try {
+    currentUser = await account.get();
+
+    document.getElementById("welcome").classList.add("hidden");
+    document.getElementById("auth").classList.add("hidden");
+    document.getElementById("home").classList.remove("hidden");
+    document.getElementById("userEmail").textContent =
+      currentUser.email;
+
+    await loadMyRequests();
+    await loadOpportunities();
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
+async function submitHelp() {
+  try {
+    if (!currentUser) return;
+
+    await tables.createRow(
+      DATABASE_ID,
+      "help_requests",
+      Appwrite.ID.unique(),
+      {
+        title: document.getElementById("helpTitle").value,
+        description: document.getElementById("helpDescription").value,
+        category: document.getElementById("helpCategory").value,
+        country: document.getElementById("helpCountry").value,
+        city: document.getElementById("helpCity").value,
+        user_id: currentUser.$id,
+        status: "pending",
+        created_at: new Date().toISOString()
+      }
+    );
+
+    alert("Request submitted for admin approval.");
+    await loadMyRequests();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function submitOpportunity() {
+  try {
+    if (!currentUser) return;
+
+    await tables.createRow(
+      DATABASE_ID,
+      "opportunities",
+      Appwrite.ID.unique(),
+      {
+        title: document.getElementById("oppTitle").value,
+        description: document.getElementById("oppDescription").value,
+        category: document.getElementById("oppCategory").value,
+        type: document.getElementById("oppType").value,
+        country: document.getElementById("oppCountry").value,
+        city: document.getElementById("oppCity").value,
+        link: document.getElementById("oppLink").value,
+        user_id: currentUser.$id,
+        status: "pending"
+      }
+    );
+
+    alert("Opportunity submitted for admin approval.");
+    await loadOpportunities();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function loadMyRequests() {
+  try {
+    const result = await tables.listRows(
+      DATABASE_ID,
+      "help_requests",
+      [Appwrite.Query.equal("user_id", currentUser.$id)]
+    );
+
+    document.getElementById("myRequests").innerHTML =
+      result.rows.map(row =>
+        `<div class="item"><b>${escapeHTML(row.title)}</b>
+        <br><small>Status: ${escapeHTML(row.status)}</small></div>`
+      ).join("") || "No requests yet.";
+  } catch (error) {
+    document.getElementById("myRequests").textContent = error.message;
+  }
+}
+
+async function loadOpportunities() {
+  try {
+    const result = await tables.listRows(
+      DATABASE_ID,
+      "opportunities",
+      [Appwrite.Query.equal("status", "approved")]
+    );
+
+    document.getElementById("opportunities").innerHTML =
+      result.rows.map(row =>
+        `<div class="item"><b>${escapeHTML(row.title)}</b>
+        <p>${escapeHTML(row.description)}</p>
+        <small>${escapeHTML(row.country || "")}</small></div>`
+      ).join("") || "No approved opportunities yet.";
+  } catch (error) {
+    document.getElementById("opportunities").textContent = error.message;
+  }
+}
+
+function escapeHTML(value) {
+  return String(value || "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+startApp();
 </script>
+</body>
+</html>
+
 </body>
 </html>
