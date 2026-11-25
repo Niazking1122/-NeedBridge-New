@@ -6,25 +6,29 @@
 <title>NeedBridge - Ask • Help • Grow Together</title>
 <meta name="theme-color" content="#075985">
 <script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f0f9ff;color:#123047}
-header{background:#075985;color:white;padding:20px;text-align:center}
-header h1{margin:0;font-size:28px}
+header{background:#075985;color:white;padding:22px 15px;text-align:center}
+header h1{margin:0;font-size:29px}
 header p{margin:7px 0 0}
-main{max-width:650px;margin:25px auto;padding:15px}
+main{max-width:700px;margin:25px auto;padding:15px}
 .card{background:white;padding:20px;border-radius:16px;margin-bottom:18px;box-shadow:0 3px 15px #0001}
 h2{color:#075985}
 input,textarea,select{width:100%;padding:13px;margin:8px 0;border:1px solid #cbd5e1;border-radius:9px;font-size:16px}
-button{background:#075985;color:white;border:0;border-radius:9px;padding:13px 18px;font-size:16px;margin:5px;cursor:pointer}
+textarea{min-height:100px}
+button{background:#075985;color:white;border:0;border-radius:9px;padding:13px 18px;font-size:16px;margin:5px 2px;cursor:pointer}
 button.secondary{background:#0f766e}
-.hidden{display:none}
-nav{display:flex;flex-wrap:wrap;justify-content:center}
+button:disabled{opacity:.6}
+.hidden{display:none!important}
 .item{border-bottom:1px solid #ddd;padding:12px 0}
 small{color:#64748b}
-#notice{padding:10px;color:#075985}
+#notice{padding:10px;color:#075985;overflow-wrap:anywhere}
+footer{text-align:center;color:#64748b;padding:20px}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -34,6 +38,7 @@ small{color:#64748b}
 </header>
 
 <main>
+
 <section id="welcome" class="card">
 <h2>Welcome to NeedBridge!</h2>
 <p>Connect with people. Ask for help. Share opportunities. Help each other.</p>
@@ -44,52 +49,74 @@ small{color:#64748b}
 <h2>Account</h2>
 <input id="name" placeholder="Full name">
 <input id="email" type="email" placeholder="Email address">
-<input id="password" type="password" placeholder="Password">
-<button onclick="signup()">Sign Up</button>
-<button class="secondary" onclick="login()">Login</button>
+<input id="password" type="password" placeholder="Password (minimum 8 characters)">
+
+<button id="signupBtn" onclick="signup()">Sign Up</button>
+<button id="loginBtn" class="secondary" onclick="login()">Login</button>
 <button onclick="resetPassword()">Forgot Password?</button>
+
 <p id="notice"></p>
 </section>
 
 <section id="home" class="hidden">
+
 <div class="card">
-<h2>Welcome!</h2>
+<h2>Welcome to NeedBridge! ❤️</h2>
 <p id="userEmail"></p>
 <button onclick="logout()">Logout</button>
 </div>
 
 <div class="card">
 <h2>Ask for Help</h2>
+
 <input id="helpTitle" placeholder="What help do you need?">
 <textarea id="helpDescription" placeholder="Explain your request"></textarea>
+
 <select id="helpCategory">
-<option>Food</option><option>Education</option>
-<option>Healthcare</option><option>Visa</option>
-<option>Clothing</option><option>Volunteering</option>
+<option>Food</option>
+<option>Education</option>
+<option>Healthcare</option>
+<option>Visa</option>
+<option>Clothing</option>
+<option>Volunteering</option>
 </select>
+
 <input id="helpCountry" placeholder="Country">
 <input id="helpCity" placeholder="City">
+
 <button onclick="submitHelp()">Submit Request</button>
+<p id="helpNotice"></p>
 </div>
 
 <div class="card">
 <h2>Give Help / Opportunities</h2>
+
 <input id="oppTitle" placeholder="Opportunity title">
 <textarea id="oppDescription" placeholder="Details"></textarea>
+
 <select id="oppCategory">
-<option>Food</option><option>Education</option>
-<option>Healthcare</option><option>Visa</option>
-<option>Clothing</option><option>Volunteering</option>
+<option>Food</option>
+<option>Education</option>
+<option>Healthcare</option>
+<option>Visa</option>
+<option>Clothing</option>
+<option>Volunteering</option>
 </select>
+
 <select id="oppType">
-<option>Free Help</option><option>Scholarship</option>
-<option>Job</option><option>Visa</option>
+<option>Free Help</option>
+<option>Scholarship</option>
+<option>Job</option>
+<option>Visa</option>
 <option>Free Course</option>
 </select>
+
 <input id="oppCountry" placeholder="Country">
 <input id="oppCity" placeholder="City">
 <input id="oppLink" placeholder="Official website link (optional)">
+
 <button onclick="submitOpportunity()">Submit Opportunity</button>
+<p id="oppNotice"></p>
 </div>
 
 <div class="card">
@@ -101,13 +128,23 @@ small{color:#64748b}
 <h2>Opportunities</h2>
 <div id="opportunities">Loading...</div>
 </div>
+
 </section>
 </main>
 
+<footer>
+🌉 NeedBridge — ASK • HELP • GROW TOGETHER ❤️
+</footer>
+
 <script>
+/* APPWRITE CONNECTION */
+
 const PROJECT_ID = "6b06ace4002b102e3d8a";
 const ENDPOINT = "https://sgp.cloud.appwrite.io/v1";
 const DATABASE_ID = "6b06af340008fdcc2251";
+
+const HELP_TABLE_ID = "help_requests";
+const OPPORTUNITY_TABLE_ID = "opportunities";
 
 const client = new Appwrite.Client()
   .setEndpoint(ENDPOINT)
@@ -118,204 +155,351 @@ const tables = new Appwrite.TablesDB(client);
 
 let currentUser = null;
 
-function showAuth() {
+
+/* BASIC FUNCTIONS */
+
+function showAuth(){
   document.getElementById("welcome").classList.add("hidden");
   document.getElementById("auth").classList.remove("hidden");
 }
 
-function message(text) {
+function message(text){
   document.getElementById("notice").textContent = text;
 }
 
-async function signup() {
-  try {
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-
-    if (!name || !email || password.length < 8) {
-      message("Enter your name, email and password (at least 8 characters).");
-      return;
-    }
-
-    await account.create(
-      Appwrite.ID.unique(),
-      email,
-      password,
-      name
-    );
-
-    await account.createEmailPasswordSession(email, password);
-    await startApp();
-  } catch (error) {
-    message(error.message);
-  }
+function setButtonLoading(id, loading, normalText){
+  const btn = document.getElementById(id);
+  btn.disabled = loading;
+  btn.textContent = loading ? "Please wait..." : normalText;
 }
 
-async function login() {
-  try {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-
-    await account.createEmailPasswordSession(email, password);
-    await startApp();
-  } catch (error) {
-    message(error.message);
-  }
+function escapeHTML(value){
+  return String(value || "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[char]);
 }
 
-async function logout() {
-  try {
-    await account.deleteSession("current");
-    location.reload();
-  } catch (error) {
-    alert(error.message);
-  }
-}
 
-async function resetPassword() {
-  try {
-    const email = document.getElementById("email").value.trim();
+/* OPEN HOME */
 
-    if (!email) {
-      message("Enter your email first.");
-      return;
-    }
-
-    await account.createRecovery(
-      email,
-      location.origin + location.pathname
-    );
-
-    message("Password recovery email sent.");
-  } catch (error) {
-    message(error.message);
-  }
-}
-
-async function startApp() {
-  try {
+async function startApp(){
+  try{
     currentUser = await account.get();
 
     document.getElementById("welcome").classList.add("hidden");
     document.getElementById("auth").classList.add("hidden");
     document.getElementById("home").classList.remove("hidden");
-    document.getElementById("userEmail").textContent =
-      currentUser.email;
 
-    await loadMyRequests();
-    await loadOpportunities();
-  } catch (error) {
-    console.log(error.message);
+    document.getElementById("userEmail").textContent =
+      "Logged in as: " + currentUser.email;
+
+    document.getElementById("myRequests").textContent = "Loading...";
+    document.getElementById("opportunities").textContent = "Loading...";
+
+    loadMyRequests();
+    loadOpportunities();
+
+  }catch(error){
+    currentUser = null;
+    document.getElementById("home").classList.add("hidden");
+    document.getElementById("auth").classList.add("hidden");
+    document.getElementById("welcome").classList.remove("hidden");
+    console.log("No active session:", error.message);
   }
 }
 
-async function submitHelp() {
-  try {
-    if (!currentUser) return;
 
-    await tables.createRow(
-      DATABASE_ID,
-      "help_requests",
-      Appwrite.ID.unique(),
-      {
-        title: document.getElementById("helpTitle").value,
-        description: document.getElementById("helpDescription").value,
+/* SIGN UP */
+
+async function signup(){
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if(!name || !email || password.length < 8){
+    message("Enter your name, email and password (at least 8 characters).");
+    return;
+  }
+
+  setButtonLoading("signupBtn", true, "Sign Up");
+
+  try{
+    await account.create({
+      userId: Appwrite.ID.unique(),
+      email: email,
+      password: password,
+      name: name
+    });
+
+    try{
+      await account.createEmailPasswordSession({
+        email: email,
+        password: password
+      });
+    }catch(sessionError){
+      const existing = await account.get();
+      if(!existing){
+        throw sessionError;
+      }
+    }
+
+    await startApp();
+
+  }catch(error){
+    message(error.message);
+  }finally{
+    setButtonLoading("signupBtn", false, "Sign Up");
+  }
+}
+
+
+/* LOGIN */
+
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if(!email || !password){
+    message("Enter your email and password.");
+    return;
+  }
+
+  setButtonLoading("loginBtn", true, "Login");
+
+  try{
+    try{
+      await account.get();
+      await startApp();
+      return;
+    }catch(noSession){
+      // No active session. Continue to login.
+    }
+
+    await account.createEmailPasswordSession({
+      email: email,
+      password: password
+    });
+
+    await startApp();
+
+  }catch(error){
+    message(error.message);
+  }finally{
+    setButtonLoading("loginBtn", false, "Login");
+  }
+}
+
+
+/* LOGOUT */
+
+async function logout(){
+  try{
+    await account.deleteSession({sessionId:"current"});
+    currentUser = null;
+    location.reload();
+  }catch(error){
+    alert(error.message);
+  }
+}
+
+
+/* FORGOT PASSWORD */
+
+async function resetPassword(){
+  const email = document.getElementById("email").value.trim();
+
+  if(!email){
+    message("Enter your email first.");
+    return;
+  }
+
+  try{
+    await account.createRecovery({
+      email: email,
+      url: location.origin + location.pathname
+    });
+
+    message("Password recovery email sent. Check your inbox.");
+  }catch(error){
+    message(error.message);
+  }
+}
+
+
+/* SUBMIT HELP REQUEST */
+
+async function submitHelp(){
+  const notice = document.getElementById("helpNotice");
+
+  try{
+    if(!currentUser){
+      notice.textContent = "Please login first.";
+      return;
+    }
+
+    const title = document.getElementById("helpTitle").value.trim();
+    const description = document.getElementById("helpDescription").value.trim();
+
+    if(!title || !description){
+      notice.textContent = "Enter title and description.";
+      return;
+    }
+
+    await tables.createRow({
+      databaseId: DATABASE_ID,
+      tableId: HELP_TABLE_ID,
+      rowId: Appwrite.ID.unique(),
+      data: {
+        title: title,
+        description: description,
         category: document.getElementById("helpCategory").value,
-        country: document.getElementById("helpCountry").value,
-        city: document.getElementById("helpCity").value,
+        country: document.getElementById("helpCountry").value.trim(),
+        city: document.getElementById("helpCity").value.trim(),
         user_id: currentUser.$id,
         status: "pending",
         created_at: new Date().toISOString()
       }
-    );
+    });
 
-    alert("Request submitted for admin approval.");
+    notice.textContent = "Submitted successfully. Waiting for Admin approval.";
+
+    document.getElementById("helpTitle").value = "";
+    document.getElementById("helpDescription").value = "";
+
     await loadMyRequests();
-  } catch (error) {
-    alert(error.message);
+
+  }catch(error){
+    notice.textContent = error.message;
   }
 }
 
-async function submitOpportunity() {
-  try {
-    if (!currentUser) return;
 
-    await tables.createRow(
-      DATABASE_ID,
-      "opportunities",
-      Appwrite.ID.unique(),
-      {
-        title: document.getElementById("oppTitle").value,
-        description: document.getElementById("oppDescription").value,
+/* SUBMIT OPPORTUNITY */
+
+async function submitOpportunity(){
+  const notice = document.getElementById("oppNotice");
+
+  try{
+    if(!currentUser){
+      notice.textContent = "Please login first.";
+      return;
+    }
+
+    const title = document.getElementById("oppTitle").value.trim();
+    const description = document.getElementById("oppDescription").value.trim();
+
+    if(!title || !description){
+      notice.textContent = "Enter opportunity title and details.";
+      return;
+    }
+
+    await tables.createRow({
+      databaseId: DATABASE_ID,
+      tableId: OPPORTUNITY_TABLE_ID,
+      rowId: Appwrite.ID.unique(),
+      data: {
+        title: title,
+        description: description,
         category: document.getElementById("oppCategory").value,
         type: document.getElementById("oppType").value,
-        country: document.getElementById("oppCountry").value,
-        city: document.getElementById("oppCity").value,
-        link: document.getElementById("oppLink").value,
+        country: document.getElementById("oppCountry").value.trim(),
+        city: document.getElementById("oppCity").value.trim(),
+        link: document.getElementById("oppLink").value.trim(),
         user_id: currentUser.$id,
         status: "pending"
       }
-    );
+    });
 
-    alert("Opportunity submitted for admin approval.");
-    await loadOpportunities();
-  } catch (error) {
-    alert(error.message);
+    notice.textContent = "Opportunity submitted. Waiting for Admin approval.";
+
+    document.getElementById("oppTitle").value = "";
+    document.getElementById("oppDescription").value = "";
+    document.getElementById("oppLink").value = "";
+
+  }catch(error){
+    notice.textContent = error.message;
   }
 }
 
-async function loadMyRequests() {
-  try {
-    const result = await tables.listRows(
-      DATABASE_ID,
-      "help_requests",
-      [Appwrite.Query.equal("user_id", currentUser.$id)]
-    );
 
-    document.getElementById("myRequests").innerHTML =
-      result.rows.map(row =>
-        `<div class="item"><b>${escapeHTML(row.title)}</b>
-        <br><small>Status: ${escapeHTML(row.status)}</small></div>`
-      ).join("") || "No requests yet.";
-  } catch (error) {
-    document.getElementById("myRequests").textContent = error.message;
+/* LOAD MY REQUESTS */
+
+async function loadMyRequests(){
+  const box = document.getElementById("myRequests");
+
+  try{
+    if(!currentUser){
+      box.textContent = "Please login.";
+      return;
+    }
+
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: HELP_TABLE_ID,
+      queries: [
+        Appwrite.Query.equal("user_id", currentUser.$id)
+      ]
+    });
+
+    box.innerHTML = result.rows.map(row => `
+      <div class="item">
+        <b>${escapeHTML(row.title)}</b>
+        <br>
+        <small>Status: ${escapeHTML(row.status)}</small>
+      </div>
+    `).join("") || "No requests yet.";
+
+  }catch(error){
+    box.textContent = "Could not load requests: " + error.message;
   }
 }
 
-async function loadOpportunities() {
-  try {
-    const result = await tables.listRows(
-      DATABASE_ID,
-      "opportunities",
-      [Appwrite.Query.equal("status", "approved")]
-    );
 
-    document.getElementById("opportunities").innerHTML =
-      result.rows.map(row =>
-        `<div class="item"><b>${escapeHTML(row.title)}</b>
+/* LOAD APPROVED OPPORTUNITIES */
+
+async function loadOpportunities(){
+  const box = document.getElementById("opportunities");
+
+  try{
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: OPPORTUNITY_TABLE_ID,
+      queries: [
+        Appwrite.Query.equal("status", "approved")
+      ]
+    });
+
+    box.innerHTML = result.rows.map(row => `
+      <div class="item">
+        <b>${escapeHTML(row.title)}</b>
         <p>${escapeHTML(row.description)}</p>
-        <small>${escapeHTML(row.country || "")}</small></div>`
-      ).join("") || "No approved opportunities yet.";
-  } catch (error) {
-    document.getElementById("opportunities").textContent = error.message;
+        <small>
+          ${escapeHTML(row.type)} |
+          ${escapeHTML(row.country)} |
+          ${escapeHTML(row.city)}
+        </small>
+        ${
+          row.link
+          ? `<p><a href="${escapeHTML(row.link)}" target="_blank" rel="noopener noreferrer">Open opportunity link</a></p>`
+          : ""
+        }
+      </div>
+    `).join("") || "No approved opportunities yet.";
+
+  }catch(error){
+    box.textContent = "Could not load opportunities: " + error.message;
   }
 }
 
-function escapeHTML(value) {
-  return String(value || "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-}
+
+/* CHECK LOGIN WHEN WEBSITE OPENS */
 
 startApp();
-</script>
-</body>
-</html>
 
+</script>
 </body>
 </html>
